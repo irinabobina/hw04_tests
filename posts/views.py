@@ -33,19 +33,14 @@ def group_posts(request, slug):
 
 @login_required
 def new_post(request):
-    if request.method == "POST":
-        form = PostForm(request.POST)
+    form = PostForm(request.POST or None)
+    if form.is_valid():
+        post = form.save(commit=False)
+        post.author = request.user
+        post.pub_date = timezone.now()
+        post.save()
+        return redirect("index")
 
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.pub_date = timezone.now()
-            post.save()
-            return redirect("index")
-
-        return render(request, "new_post.html", {"form": form})
-
-    form = PostForm()
     return render(request, "new_post.html", {"form": form})
 
 
@@ -62,19 +57,16 @@ def post_view(request, username, post_id):
     post = get_object_or_404(author.posts.all(), pk=post_id)
     return render(request, "post.html", {"post": post, "author": author})
 
-
+@login_required
 def post_edit(request, username, post_id):
-    user = get_object_or_404(User, username=username)
-    if request.user != user:
-        return redirect("post_detail", username=username, post_id=post_id)
 
-    post = get_object_or_404(user.posts.all(), pk=post_id)
+    post = get_object_or_404(Post, pk=post_id, author__username=username)
     form = PostForm(request.POST or None, instance=post)
 
-    if request.method == "POST":
-        if form.is_valid():
-            post.pub_date = timezone.now()
-            form.save()
-            return redirect("post_detail", username=username, post_id=post.pk)
-        return render(request, "new_post.html", {"form": form, "post": post})
+    
+    if form.is_valid():
+        post.pub_date = timezone.now()
+        form.save()
+        return redirect("post_detail", username=username, post_id=post.pk)
     return render(request, "new_post.html", {"form": form, "post": post})
+  
