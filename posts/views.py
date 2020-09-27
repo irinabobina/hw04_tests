@@ -7,8 +7,6 @@ from .forms import PostForm
 from .models import Group, Post, User
 
 
-class Meta:
-    ordering = Post.objects.order_by("-pub_date")
 
 
 def get_paginated_view(request, post_list, page_size=10):
