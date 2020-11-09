@@ -8,5 +8,4 @@ urlpatterns = [
     path('<username>/', views.profile, name='profile'),
     path('<username>/<int:post_id>/', views.post_view, name='post_detail'),
     path('<username>/<int:post_id>/edit/', views.post_edit, name='post_edit'),
-    path('<username>/group/<int:post_id>/edit/', views.post_edit, name='post_in_gr_edit'),
 ]
